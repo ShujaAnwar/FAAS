@@ -1,0 +1,9 @@
+{
+  "name": "fiqh-academy-ams-frontend",
+  "version": "1.0.0",
+  "description": "Frontend for Fiqh Academy Attendance Management System",
+  "scripts": {
+    "build": "echo 'No build step for static site'",
+    "dev": "echo 'Run with live server'"
+  }
+}

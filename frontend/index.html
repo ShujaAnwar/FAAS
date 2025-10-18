@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fiqh Academy AMS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Login Section -->
+    <div class="login-container" id="login-section">
+        <div class="login-box">
+            <div class="login-logo">
+                <i class="fas fa-user-clock"></i>
+                <h1>Fiqh Academy AMS</h1>
+                <p>Attendance Management System</p>
+            </div>
+
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="username">Username / Employee ID</label>
+                    <input type="text" id="username" placeholder="Enter your username or Employee ID" required>
+                </div>
+
+                <div class="form-group password-toggle">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Enter your password" required>
+                    <i class="fas fa-eye" id="toggle-password"></i>
+                </div>
+
+                <div class="form-group">
+                    <label for="campus">Select Campus</label>
+                    <select id="campus" required>
+                        <option value="">-- Select Campus --</option>
+                        <option value="main">Fiqh Academy - Main Campus</option>
+                        <option value="johar">Fiqh Academy - Johar Campus</option>
+                        <option value="masjid">Fiqh Academy - Masjid Campus</option>
+                        <option value="maktab">Fiqh Academy - Maktab Campus</option>
+                        <option value="employee" selected>Employee Self-Service Portal</option>
+                    </select>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="remember-password">
+                    <label for="remember-password">Remember me</label>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+
+                <div style="text-align: center; margin-top: 15px;">
+                    <a href="#" id="forgot-password-link">Forgot Password?</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div class="container" id="app-container">
+        <header>
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-user-clock"></i>
+                    <h1>Fiqh Academy AMS</h1>
+                </div>
+                <div class="user-info">
+                    <div class="real-time-clock">
+                        <i class="fas fa-clock"></i>
+                        <span id="current-date-time"></span>
+                    </div>
+                    <i class="fas fa-user"></i>
+                    <span id="logged-in-user">User Name</span>
+                    <span class="campus-badge" id="logged-in-campus">Campus</span>
+                    <button class="btn logout-btn" id="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <div class="tabs no-print" id="admin-tabs">
+            <div class="tab active" data-tab="dashboard-tab">Dashboard</div>
+            <div class="tab" data-tab="manual-attendance-tab">Manual Attendance</div>
+            <div class="tab" data-tab="single-attendance-tab">Single Employee Attendance</div>
+            <div class="tab" data-tab="employee-management-tab">Employee Management</div>
+            <div class="tab" data-tab="leave-management-tab" id="leave-management-tab" style="display: none;">Leave Management</div>
+            <div class="tab" data-tab="reports-tab">Reports</div>
+            <div class="tab" data-tab="backup-tab">Backup/Restore/Data Management</div>
+            <div class="tab" data-tab="admin-controls-tab" id="admin-tab" style="display: none;">Admin Controls</div>
+        </div>
+
+        <div class="tabs no-print" id="employee-tabs" style="display: none;">
+            <div class="tab active" data-tab="attendance-tab">Mark Attendance</div>
+            <div class="tab" data-tab="profile-tab">My Profile</div>
+            <div class="tab" data-tab="leave-management-employee-tab">Leave Management</div>
+            <div class="tab" data-tab="attendance-timesheets-tab">Attendance & Timesheets</div>
+            <div class="tab" data-tab="performance-reviews-tab">Performance Reviews</div>
+        </div>
+
+        <!-- Admin Dashboard Tab -->
+        <div class="tab-content active" id="dashboard-tab">
+            <div class="dashboard-stats">
+                <div class="stat-card main-campus">
+                    <div class="stat-label">Main Campus</div>
+                    <div class="stat-value" id="main-campus-stats">Present: 0 / 0, Late: 0</div>
+                    <div class="stat-label">Employees</div>
+                </div>
+                <div class="stat-card johar-campus">
+                    <div class="stat-label">Johar Campus</div>
+                    <div class="stat-value" id="johar-campus-stats">Present: 0 / 0, Late: 0</div>
+                    <div class="stat-label">Employees</div>
+                </div>
+                <div class="stat-card masjid-campus">
+                    <div class="stat-label">Masjid Campus</div>
+                    <div class="stat-value" id="masjid-campus-stats">Present: 0 / 0, Late: 0</div>
+                    <div class="stat-label">Employees</div>
+                </div>
+                <div class="stat-card maktab-campus">
+                    <div class="stat-label">Maktab Campus</div>
+                    <div class="stat-value" id="maktab-campus-stats">Present: 0 / 0, Late: 0</div>
+                    <div class="stat-label">Employees</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Present Today</div>
+                    <div class="stat-value" id="total-present-today">0</div>
+                    <div class="stat-label">Across All Campuses</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Late Today</div>
+                    <div class="stat-value" id="total-late-today">0</div>
+                    <div class="stat-label">Across All Campuses</div>
+                </div>
+            </div>
+
+            <div class="charts-container">
+                <div class="chart-card">
+                    <div class="chart-title">Attendance by Campus (Today)</div>
+                    <canvas id="campusAttendanceChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Monthly Attendance Trend</div>
+                    <canvas id="monthlyTrendChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Late Comers (Monthly)</div>
+                    <canvas id="lateComersChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Employees on Leave (Monthly)</div>
+                    <canvas id="leavesChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Campus-wise Comparison</div>
+                    <canvas id="campusComparisonChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Regular vs. Irregular Attendance</div>
+                    <canvas id="regularIrregularChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2>Today's Attendance Details</h2>
+                </div>
+                <div class="card-body">
+                    <div class="attendance-details">
+                        <div class="form-group">
+                            <label for="dashboard-date-select">Select Date</label>
+                            <input type="date" id="dashboard-date-select" value="">
+                        </div>
+
+                        <div class="summary-table" id="attendance-summary-table">
+                            <!-- Attendance details will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h2>Best Employees</h2>
+                </div>
+                <div class="card-body">
+                    <div class="tabs no-print" id="best-employees-tabs">
+                        <div class="tab active" data-tab="best-today">Today</div>
+                        <div class="tab" data-tab="best-weekly">Weekly</div>
+                        <div class="tab" data-tab="best-monthly">Monthly</div>
+                    </div>
+                    <div class="tab-content active" id="best-today">
+                        <div class="best-performers" id="best-today-list">
+                            <!-- Best today will be populated here -->
+                        </div>
+                    </div>
+                    <div class="tab-content" id="best-weekly">
+                        <div class="best-performers" id="best-weekly-list">
+                            <!-- Best weekly will be populated here -->
+                        </div>
+                    </div>
+                    <div class="tab-content" id="best-monthly">
+                        <div class="best-performers" id="best-monthly-list">
+                            <!-- Best monthly will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Manual Attendance Tab -->
+        <div class="tab-content" id="manual-attendance-tab">
+            <div class="main-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Manual Attendance Entry</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label for="manual-attendance-date">Select Date</label>
+                            <input type="date" id="manual-attendance-date" value="">
+                        </div>
+
+                        <div class="manual-attendance-table-container">
+                            <table class="manual-attendance-table">
+                                <thead>
+                                    <tr>
+                                        <th>Employee ID</th>
+                                        <th>Name</th>
+                                        <th>Designation</th>
+                                        <th>Time In</th>
+                                        <th>Time Out</th>
+                                        <th>Status</th>
+                                        <th>Remarks</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="manual-attendance-table-body">
+                                    <!-- Manual attendance table will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="action-buttons">
+                            <button class="btn btn-success" id="save-manual-attendance">
+                                <i class="fas fa-save"></i> Save Attendance
+                            </button>
+                            <button class="btn btn-primary" id="load-manual-attendance">
+                                <i class="fas fa-sync"></i> Load Attendance
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Single Employee Attendance Tab -->
+        <div class="tab-content" id="single-attendance-tab">
+            <div class="main-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Single Employee Attendance Entry</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label for="single-employee-select">Select Employee</label>
+                            <select id="single-employee-select">
+                                <option value="">-- Select Employee --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="single-attendance-date">Select Date</label>
+                            <input type="date" id="single-attendance-date" value="">
+                        </div>
+                        <div class="form-group">
+                            <label for="single-time-in">Time In</label>
+                            <input type="time" id="single-time-in">
+                        </div>
+                        <div class="form-group">
+                            <label for="single-time-out">Time Out</label>
+                            <input type="time" id="single-time-out">
+                        </div>
+                        <div class="form-group">
+                            <label for="single-status">Status</label>
+                            <select id="single-status">
+                                <option value="present">Present</option>
+                                <option value="late">Late</option>
+                                <option value="absent">Absent</option>
+                                <option value="holiday">Holiday</option>
+                                <option value="leave">Leave</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="single-remarks">Remarks</label>
+                            <input type="text" id="single-remarks" placeholder="Add remarks">
+                        </div>
+                        <div class="action-buttons">
+                            <button class="btn btn-success" id="save-single-attendance">
+                                <i class="fas fa-save"></i> Save
+                            </button>
+                            <button class="btn btn-primary" id="load-single-attendance">
+                                <i class="fas fa-sync"></i> Load
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Employee Management Tab -->
+        <div class="tab-content" id="employee-management-tab">
+            <div class="main-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Employee Management</h2>
+                        <button class="btn btn-primary" id="add-employee-btn">
+                            <i class="fas fa-plus"></i> Add Employee
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="employee-search" placeholder="Search by name or ID...">
+                        </div>
+
+                        <div class="employee-list">
+                            <table id="employee-table">
+                                <thead>
+                                    <tr>
+                                        <th>Emp ID</th>
+                                        <th>Name</th>
+                                        <th>Designation</th>
+                                        <th>Campus</th>
+                                        <th>Shift Start</th>
+                                        <th>Shift End</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="employee-table-body">
+                                    <!-- Employee data will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Employee Details</h2>
+                        <span id="employee-details-title">Add/Edit Employee</span>
+                    </div>
+                    <div class="card-body">
+                        <form id="employee-form">
+                            <input type="hidden" id="employee-id">
+
+                            <div class="form-group">
+                                <label for="employee-name">Employee Name</label>
+                                <input type="text" id="employee-name" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="employee-designation">Designation</label>
+                                <input type="text" id="employee-designation" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="employee-campus">Campus</label>
+                                <select id="employee-campus" required>
+                                    <option value="main">Main Campus</option>
+                                    <option value="johar">Johar Campus</option>
+                                    <option value="masjid">Masjid Campus</option>
+                                    <option value="maktab">Maktab Campus</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="employee-status">Status</label>
+                                <select id="employee-status" required>
+                                    <option value="full_time">Full Time</option>
+                                    <option value="part_time">Part Time</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="shift-start">Standard Shift Start</label>
+                                <input type="time" id="shift-start" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="shift-end">Standard Shift End</label>
+                                <input type="time" id="shift-end" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="employee-username">Username</label>
+                                <input type="text" id="employee-username" required>
+                            </div>
+
+                            <div class="form-group password-toggle">
+                                <label for="employee-password">Password (leave blank to keep current)</label>
+                                <input type="password" id="employee-password">
+                                <i class="fas fa-eye toggle-password-field"></i>
+                            </div>
+
+                            <div class="action-buttons">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-save"></i> Save Employee
+                                </button>
+                                <button type="button" class="btn btn-danger" id="reset-form-btn">
+                                    <i class="fas fa-times"></i> Reset
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Leave Management Tab -->
+        <div class="tab-content" id="leave-management-tab">
+            <div class="main-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Leave Management</h2>
+                        <button class="btn btn-primary" id="save-leaves-btn">
+                            <i class="fas fa-save"></i> Save Leaves
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="leave-search" placeholder="Search by name or ID...">
+                        </div>
+
+                        <div class="table-container">
+                            <table class="leave-management-table">
+                                <thead>
+                                    <tr>
+                                        <th>SN</th>
+                                        <th>Employee Name</th>
+                                        <th>Campus</th>
+                                        <th colspan="3">Annual (Days)</th>
+                                        <th colspan="3">Casual (Days)</th>
+                                        <th colspan="3">Medical (Days)</th>
+                                        <th>Total Leaves</th>
+                                        <th>Availed</th>
+                                        <th>Remaining</th>
+                                    </tr>
+                                    <tr>
+                                        <th></th>
+                                        <th></th>
+                                        <th></th>
+                                        <th>Total</th>
+                                        <th>Used</th>
+                                        <th>Bal.</th>
+                                        <th>Total</th>
+                                        <th>Used</th>
+                                        <th>Bal.</th>
+                                        <th>Total</th>
+                                        <th>Used</th>
+                                        <th>Bal.</th>
+                                        <th></th>
+                                        <th></th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="leave-management-table-body">
+                                    <!-- Leave data will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Pending Leave Requests</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table class="leave-management-table">
+                                <thead>
+                                    <tr>
+                                        <th>Employee ID</th>
+                                        <th>Name</th>
+                                        <th>Type</th>
+                                        <th>From</th>
+                                        <th>To</th>
+                                        <th>Reason</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pending-leave-requests-body">
+                                    <!-- Pending requests will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reports Tab -->
+        <div class="tab-content" id="reports-tab">
+            <div class="main-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Generate Reports</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label for="report-type">Report Type</label>
+                            <select id="report-type">
+                                <option value="attendance">Attendance Summary</option>
+                                <option value="late">Late Arrivals</option>
+                                <option value="overtime">Overtime Report</option>
+                                <option value="campus">Campus-wise Report</option>
+                                <option value="employee">Employee Performance</option>
+                                <option value="detailed">Detailed Attendance</option>
+                                <option value="leaves">Leaves Report</option>
+                                <option value="credentials">Employee Credentials</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="report-employee-select">Select Employee</label>
+                            <select id="report-employee-select">
+                                <option value="all">All Employees</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="report-campus-select">Select Campus</label>
+                            <select id="report-campus-select">
+                                <option value="all">All Campuses</option>
+                                <option value="main">Main Campus</option>
+                                <option value="johar">Johar Campus</option>
+                                <option value="masjid">Masjid Campus</option>
+                                <option value="maktab">Maktab Campus</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="report-month-select">Select Month</label>
+                            <input type="month" id="report-month-select" value="">
+                        </div>
+
+                        <div class="action-buttons">
+                            <button class="btn btn-primary" id="generate-report-btn">
+                                <i class="fas fa-chart-bar"></i> Generate Report
+                            </button>
+                            <button class="btn btn-success" id="print-report-btn">
+                                <i class="fas fa-print"></i> Print Report
+                            </button>
+                            <button class="btn btn-info" id="export-pdf-btn">
+                                <i class="fas fa-file-pdf"></i> Export as PDF
+                            </button>
+                        </div>
+
+                        <div class="report-section" id="report-output" style="display: none;">
+                            <h3 id="report-title"></h3>
+                            <div id="report-content">
+                                <!-- Report content will be generated here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Backup/Restore Tab -->
+        <div class="tab-content" id="backup-tab">
+            <div class="main-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Data Backup, Restore & Management</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="backup-section">
+                            <h3>Backup Data</h3>
+                            <p>Create a backup of all employee and attendance data.</p>
+                            <div class="action-buttons">
+                                <button class="btn btn-primary" id="backup-data-btn">
+                                    <i class="fas fa-download"></i> Backup Data
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="backup-section">
+                            <h3>Restore Data</h3>
+                            <p>Restore data from a previous backup.</p>
+                            <div class="form-group">
+                                <label for="restore-file">Select Backup File</label>
+                                <input type="file" id="restore-file" accept=".json">
+                            </div>
+                            <div class="action-buttons">
+                                <button class="btn btn-warning" id="restore-data-btn">
+                                    <i class="fas fa-upload"></i> Restore Data
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="backup-section">
+                            <h3>Remove Data Month-wise</h3>
+                            <p>Select a month to remove all attendance data for that month across all employees.</p>
+                            <div class="form-group">
+                                <label for="remove-month-select">Select Month to Remove</label>
+                                <input type="month" id="remove-month-select" value="">
+                            </div>
+                            <div class="action-buttons">
+                                <button class="btn btn-danger" id="remove-month-data-btn">
+                                    <i class="fas fa-trash-alt"></i> Remove Month Data
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Controls Tab -->
+        <div class="tab-content" id="admin-controls-tab">
+            <div class="main-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>User Management</h2>
+                        <button class="btn btn-primary" id="add-user-btn">
+                            <i class="fas fa-plus"></i> Add User
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="admin-controls">
+                            <div class="table-container">
+                                <table class="user-management-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Username</th>
+                                            <th>Name</th>
+                                            <th>Campus</th>
+                                            <th>Role</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="user-management-table-body">
+                                        <!-- User data will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Add/Edit User</h2>
+                    </div>
+                    <div class="card-body">
+                        <form id="user-form">
+                            <input type="hidden" id="user-username">
+
+                            <div class="form-group">
+                                <label for="new-username">Username</label>
+                                <input type="text" id="new-username" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="new-password">Password</label>
+                                <input type="password" id="new-password">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="new-name">Full Name</label>
+                                <input type="text" id="new-name" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="new-campus">Campus</label>
+                                <select id="new-campus" required>
+                                    <option value="main">Main Campus</option>
+                                    <option value="johar">Johar Campus</option>
+                                    <option value="masjid">Masjid Campus</option>
+                                    <option value="maktab">Maktab Campus</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="new-role">Role</label>
+                                <select id="new-role" required>
+                                    <option value="user">User</option>
+                                    <option value="admin">Admin</option>
+                                    <option value="mudeer">Mudeer</option>
+                                </select>
+                            </div>
+
+                            <div class="action-buttons">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-save"></i> Save User
+                                </button>
+                                <button type="button" class="btn btn-danger" id="reset-user-form-btn">
+                                    <i class="fas fa-times"></i> Reset
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Employee Portal - Attendance Tab -->
+        <div class="tab-content" id="attendance-tab">
+            <div class="main-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Mark Your Attendance</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="employee-details">
+                            <h3>Employee Information</h3>
+                            <div class="employee-details-grid">
+                                <div class="employee-detail-item">
+                                    <span class="employee-detail-label">Employee ID</span>
+                                    <span class="employee-detail-value" id="employee-id-display">-</span>
+                                </div>
+                                <div class="employee-detail-item">
+                                    <span class="employee-detail-label">Name</span>
+                                    <span class="employee-detail-value" id="employee-name-display">-</span>
+                                </div>
+                                <div class="employee-detail-item">
+                                    <span class="employee-detail-label">Designation</span>
+                                    <span class="employee-detail-value" id="employee-designation-display">-</span>
+                                </div>
+                                <div class="employee-detail-item">
+                                    <span class="employee-detail-label">Department</span>
+                                    <span class="employee-detail-value" id="employee-department-display">-</span>
+                                </div>
+                                <div class="employee-detail-item">
+                                    <span class="employee-detail-label">Campus</span>
+                                    <span class="employee-detail-value" id="employee-campus-display">-</span>
+                                </div>
+                                <div class="employee-detail-item">
+                                    <span class="employee-detail-label">Standard Shift</span>
+                                    <span class="employee-detail-value" id="employee-shift-display">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="attendance-remarks">Remarks (Optional)</label>
+                            <input type="text" id="attendance-remarks" placeholder="Add any remarks for today's attendance">
+                        </div>
+
+                        <div class="attendance-controls">
+                            <button class="btn btn-success" id="employee-mark-time-in" title="Mark Time In">
+                                <i class="fas fa-sign-in-alt"></i> Time In
+                            </button>
+                            <button class="btn btn-danger" id="employee-mark-time-out" title="Mark Time Out">
+                                <i class="fas fa-sign-out-alt"></i> Time Out
+                            </button>
+                            <button class="btn btn-warning" id="employee-mark-leave" title="Mark Leave">
+                                <i class="fas fa-calendar-times"></i> Mark Leave
+                            </button>
+                        </div>
+
+                        <div class="attendance-status" id="employee-attendance-status"></div>
+
+                        <div class="today-summary" id="employee-today-summary">
+                            <h3>Today's Attendance</h3>
+                            <p>No attendance recorded for today yet.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2>My Attendance Calendar</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="month-selector">
+                            <label for="employee-month-select">View Attendance for:</label>
+                            <input type="month" id="employee-month-select" value="">
+                        </div>
+
+                        <div class="calendar-view" id="employee-attendance-calendar">
+                            <!-- Calendar will be generated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Employee Portal - Profile Tab -->
+        <div class="tab-content" id="profile-tab">
+            <div class="main-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>My Profile</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="employee-details">
+                            <h3>Personal Information</h3>
+                            <div class="employee-details-grid">
+                                <div class="employee-detail-item">
+                                    <span class="employee-detail-label">Employee ID</span>
+                                    <span class="employee-detail-value" id="profile-employee-id">-</span>
+                                </div>
+                                <div class="employee-detail-item">
+                                    <span class="employee-detail-label">Name</span>
+                                    <span class="employee-detail-value" id="profile-employee-name">-</span>
+                                </div>
+                                <div class="employee-detail-item">
+                                    <span class="employee-detail-label">Designation</span>
+                                    <span class="employee-detail-value" id="profile-employee-designation">-</span>
+                                </div>
+                                <div class="employee-detail-item">
+                                    <span class="employee-detail-label">Department</span>
+                                    <span class="employee-detail-value" id="profile-employee-department">-</span>
+                                </div>
+                                <div class="employee-detail-item">
+                                    <span class="employee-detail-label">Campus</span>
+                                    <span class="employee-detail-value" id="profile-employee-campus">-</span>
+                                </div>
+                                <div class="employee-detail-item">
+                                    <span class="employee-detail-label">Standard Shift</span>
+                                    <span class="employee-detail-value" id="profile-employee-shift">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Change Password</h2>
+                    </div>
+                    <div class="card-body">
+                        <form id="change-password-form">
+                            <div class="form-group password-toggle">
+                                <label for="current-password">Current Password</label>
+                                <input type="password" id="current-password" placeholder="Enter current password" required>
+                                <i class="fas fa-eye toggle-password-field"></i>
+                            </div>
+
+                            <div class="form-group password-toggle">
+                                <label for="new-password">New Password</label>
+                                <input type="password" id="new-password" placeholder="Enter new password" required>
+                                <i class="fas fa-eye toggle-password-field"></i>
+                            </div>
+
+                            <div class="form-group password-toggle">
+                                <label for="confirm-password">Confirm New Password</label>
+                                <input type="password" id="confirm-password" placeholder="Confirm new password" required>
+                                <i class="fas fa-eye toggle-password-field"></i>
+                            </div>
+
+                            <div class="action-buttons">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-key"></i> Change Password
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Employee Portal - Leave Management Tab -->
+        <div class="tab-content" id="leave-management-employee-tab">
+            <div class="main-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Leave Management</h2>
+                    </div>
+                    <div class="card-body">
+                        <h3>Leave Balances</h3>
+                        <div class="attendance-summary">
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">
+                                <h4 style="color: var(--primary); margin-bottom: 5px;"><span id="annual-leave-balance">0/0</span></h4>
+                                <p style="font-size: 0.9rem; color: var(--gray);">Annual (Used/Total)</p>
+                            </div>
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">
+                                <h4 style="color: var(--primary); margin-bottom: 5px;"><span id="casual-leave-balance">0/0</span></h4>
+                                <p style="font-size: 0.9rem; color: var(--gray);">Casual (Used/Total)</p>
+                            </div>
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">
+                                <h4 style="color: var(--primary); margin-bottom: 5px;"><span id="medical-leave-balance">0/0</span></h4>
+                                <p style="font-size: 0.9rem; color: var(--gray);">Medical (Used/Total)</p>
+                            </div>
+                        </div>
+
+                        <h3>Apply for Leave</h3>
+                        <form id="leave-application-form">
+                            <div class="form-group">
+                                <label for="leave-type">Leave Type</label>
+                                <select id="leave-type" required>
+                                    <option value="">-- Select Type --</option>
+                                    <option value="annual">Annual</option>
+                                    <option value="casual">Casual</option>
+                                    <option value="medical">Medical</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="leave-from">From Date</label>
+                                <input type="date" id="leave-from" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="leave-to">To Date</label>
+                                <input type="date" id="leave-to" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="leave-reason">Reason</label>
+                                <textarea id="leave-reason" placeholder="Enter reason for leave" required></textarea>
+                            </div>
+                            <div class="action-buttons">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane"></i> Apply
+                                </button>
+                            </div>
+                        </form>
+
+                        <h3>Leave Requests</h3>
+                        <div class="table-container">
+                            <table class="leave-management-table">
+                                <thead>
+                                    <tr>
+                                        <th>Type</th>
+                                        <th>From</th>
+                                        <th>To</th>
+                                        <th>Reason</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="leave-requests-table-body">
+                                    <!-- Leave requests will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Employee Portal - Attendance & Timesheets Tab -->
+        <div class="tab-content" id="attendance-timesheets-tab">
+            <div class="main-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Attendance & Timesheets</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="month-selector">
+                            <label for="attendance-month-select">Select Month:</label>
+                            <input type="month" id="attendance-month-select" value="">
+                        </div>
+                        <div class="table-container">
+                            <table class="manual-attendance-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Time In</th>
+                                        <th>Time Out</th>
+                                        <th>Status</th>
+                                        <th>Remarks</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="attendance-timesheets-table-body">
+                                    <!-- Attendance records will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Employee Portal - Performance Reviews Tab -->
+        <div class="tab-content" id="performance-reviews-tab">
+            <div class="main-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Performance Reviews</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table class="manual-attendance-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Rating</th>
+                                        <th>Feedback</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="performance-reviews-table-body">
+                                    <!-- Performance reviews will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <p id="no-reviews-message" style="display: none; text-align: center; margin-top: 20px;">No performance reviews available yet.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="no-print">
+            <p>Fiqh Academy AMS &copy; 2023 | All Rights Reserved</p>
+        </footer>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div class="loading" id="loading-spinner">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Include all JavaScript files -->
+    <script src="js/utils.js"></script>
+    <script src="js/api-service.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/employees.js"></script>
+    <script src="js/attendance.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/reports.js"></script>
+    <script src="js/users.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
